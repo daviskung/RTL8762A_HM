@@ -168,8 +168,8 @@ void peripheral_HandleBtGapStateChangeEvt(uint8_t newState)
         //device is connected
         case GAPSTATE_CONNECTED:
             {
-				BTconnectState = BTCONN_DEBUG_GAPSTATE_CONNECTED;
-				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** Into BTCONN_DEBUG_GAPSTATE_CONNECTED !  \n", 0);
+				BTconnectState = BTCONN_GAPSTATE_CONNECTED;
+				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** Into BTCONN_GAPSTATE_CONNECTED !  \n", 0);
             }
             break;
 

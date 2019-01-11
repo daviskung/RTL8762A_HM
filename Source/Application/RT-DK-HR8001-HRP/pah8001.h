@@ -27,7 +27,7 @@
 #define SENSOR_PAH8001_INTERVAL 2000    // 40
 #define SENSOR_PAH8001_TIMER_ID 3552
 
-#define KEYscan_Timer_INTERVAL 	500    // 40
+#define KEYscan_Timer_INTERVAL 	250    //  250ms
 #define KEYscan_Timer_ID		3554
 
 
@@ -40,7 +40,7 @@
 //#define EVENT_PWR_KEY_RELEASE_SET		7
 
 #define BTCONN_GAPSTATE_ADVERTISING			8
-#define BTCONN_DEBUG_GAPSTATE_CONNECTED		9
+#define BTCONN_GAPSTATE_CONNECTED		9
 
 
 #define USB_5V_IN_SET	1
@@ -48,6 +48,8 @@
 
 
 #define ARY_SIZE		100
+
+#define NO_SIGNAL_SHUTDOWN_CNT_SET			25
 
 /* Defines ------------------------------------------------------------------*/
 

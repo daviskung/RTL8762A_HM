@@ -51,7 +51,7 @@ extern void Driver_Init(void);
 extern uint8_t _touch_flag;
 extern uint8_t	NSTROBE_LOW_EndSet;
 
-UINT8 key_cnt,KEYscan_fun_cnt,cnt500ms;
+UINT8 key_cnt,KEYscan_fun_cnt,cnt250ms;
 uint16_t WaitForConnect_Timeout;  // current setting
 
 extern uint8_t PWM_chanEN_Number;
@@ -100,14 +100,15 @@ uint8_t NoSignalShutdownCnt;
  /* event */
 #define IO_DEMO_EVENT_ADC_CONVERT_END          0x01
 
-#define	PWR_KEY_OFF_TIME_SET	5	
-#define	WAIT_FOR_CONNECT_TIME_SET	360	// 500ms*360 
+#define	PWR_KEY_OFF_TIME_SET	10	
+#define	WAIT_FOR_CONNECT_TIME_SET	720	// 250ms*720 (3 min)
 
 /* version date set */
-#define	VER_DAY_SET		10
-#define	VER_MONTH_SET	1
 #define	VER_YEAR_SET	2019
-#define	VER_DASH_SET	3
+#define	VER_MONTH_SET	1
+#define	VER_DAY_SET		11
+
+#define	VER_DASH_SET	0
 // push code to Backlog : 
 // Repository Name : RTL8762HM3_0107_2019
 // HTTPhttps://davishm3.backlog.com/git/RTL8762HM3/RTL8762HM3_0107_2019.git
@@ -274,7 +275,7 @@ void heartrate_task_app(void *pvParameters)
 	uTxCnt = sprintf((char *)uTxBuf, "RTL\n\r");	// RTL8762 開機完成,sprintf 回傳 字元len
 	UART_SendData(UART, uTxBuf, uTxCnt);
 	key_cnt = 0;
-	cnt500ms = 0;
+	cnt250ms = 0;
 	WaitForConnect_Timeout = 0;
 	i=0;
 	
@@ -320,15 +321,8 @@ void heartrate_task_app(void *pvParameters)
 
 			if(Event == EVENT_SCAN_KEY_TIMER)
 			{
-				#if 0
-				tmp_i++;
-				if(tmp_i%2 == 0)
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_SET); 
-				else 
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_RESET);
-				#endif
 				
-				if((KEYscan_fun_cnt != 0)&&(cnt500ms%5 == 0)) {
+				if((KEYscan_fun_cnt != 0)&&(cnt250ms%10 == 0)) {
 					EnPICcmdBuf[0]='E';
 					EnPICcmdBuf[1]='N';
 					EnPICcmdBuf[2]=KEYscan_fun_cnt+'0';
@@ -340,31 +334,34 @@ void heartrate_task_app(void *pvParameters)
 						DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** PIC can NOT work \n", 0);
 						
 				}
-				cnt500ms++;
+				cnt250ms++;
 
+				if(( PWRkey_timer_cnt > 4 ) && ( GPIO_ReadInputDataBit(GPIO_PWR_KEY_PIN) == SET )) // <PWR_KEY> push over 1 sec keep LED on
+				{	
+					GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_SET); 
+				}
+				else
+				{
+					if( BTconnectState == BTCONN_GAPSTATE_ADVERTISING)
+					{
+						WaitForConnect_Timeout++;
+						if( cnt250ms%2 == 0 )
+							GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_RESET); 	
+						else
+							GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_SET); 
+					}	
+
+					else if( BTconnectState == BTCONN_GAPSTATE_CONNECTED)
+					{
+					
+						WaitForConnect_Timeout = 0;
+						if( cnt250ms%10 == 0 )
+							GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_SET); 
+						else
+							GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_RESET); 
+					}
+				}
 				
-				if( BTconnectState == BTCONN_GAPSTATE_ADVERTISING)
-				{
-					
-					WaitForConnect_Timeout++;
-					if( cnt500ms%2 == 0 ){
-						GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_RESET); 	
-						
-					} 
-					else{
-						GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_SET); 
-					} 
-				}	
-
-				if( BTconnectState == BTCONN_DEBUG_GAPSTATE_CONNECTED)
-				{
-					
-					WaitForConnect_Timeout = 0;
-					if( cnt500ms%6 == 0 )
-						GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_SET); 
-					else
-						GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_RESET); 
-				}	
 		#if 0
 				if( GPIO_ReadInputDataBit(GPIO_S4_TEST_KEY_PIN) == RESET ){				
 					key_cnt++;
@@ -401,14 +398,6 @@ void heartrate_task_app(void *pvParameters)
 
 			if( Event == EVENT_RxEndFlag_SET ){
 
-				#if 0
-				tmp_i++;
-				if(tmp_i%2 == 0)
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_SET); 
-				else 
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_RESET);
-				#endif
-			
 				/* rx end */
 				if(RxEndFlag == 1)
 				{
@@ -460,7 +449,7 @@ void heartrate_task_app(void *pvParameters)
 									}
 					        }
 							
-							if( NoSignalShutdownCnt > 20 ){
+							if( NoSignalShutdownCnt > NO_SIGNAL_SHUTDOWN_CNT_SET ){
 								//DBG_BUFFER(MODULE_APP, LEVEL_INFO, "< No Signal Shutdown >",0);
 								GPIO_WriteBit(GPIO_STATUS_LED_PIN,Bit_RESET); 
 								DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** < No Signal Shutdown > / PWR_CONTROL_PIN Off !!!\n", 0);
@@ -478,15 +467,6 @@ void heartrate_task_app(void *pvParameters)
 				}
 			}
 			if( Event == EVENT_PWR_KEY_PUSH_SET ){
-				#if 0
-				tmp_i++;
-				if(tmp_i%2 == 0)
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_SET); 
-				else 
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_RESET);
-				#endif
-				
-				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** EVENT_PWR_KEY_PUSH_SET \n", 0);
 				key_cnt++;
 				PWRkey_timer_cnt = 0;
 				DBG_BUFFER(MODULE_APP, LEVEL_INFO, " PWR_KEY INT cnt = %d / timer = %d \n", 2,key_cnt,PWRkey_timer_cnt);
