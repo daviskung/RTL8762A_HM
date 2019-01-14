@@ -479,8 +479,8 @@ void UpdateBatteryLevel(void)
     }
 	
 	
-	//	DBG_BUFFER(MODULE_APP, LEVEL_INFO, " **BatteryLevel %d adc value = 0x%x volt=%d \n",
-	//	3,tmpvalue,adcConvertRes,VoltRead);
+		DBG_BUFFER(MODULE_APP, LEVEL_INFO, " **BatteryLevel %d adc value = 0x%x volt=%d \n",
+		3,tmpvalue,adcConvertRes,VoltRead);
 	
     ADC_Cmd(ADC, ADC_One_Shot_Mode, DISABLE);
     BAS_SetParameter(BAS_PARAM_BATTERY_LEVEL, 1, &gBASBatteryLevel);

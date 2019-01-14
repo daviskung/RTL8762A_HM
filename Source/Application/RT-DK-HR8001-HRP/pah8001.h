@@ -67,6 +67,10 @@
 #define STATUS_LED_PIN             P0_2
 #define GPIO_STATUS_LED_PIN        GPIO_GetPin(STATUS_LED_PIN)
 
+#define BAT_VOLT_IN_CONT_PIN       P2_0
+#define GPIO_BAT_VOLT_IN_CONT_PIN  GPIO_GetPin(BAT_VOLT_IN_CONT_PIN)
+
+
 #define PWR_CONTROL_PIN            P3_2
 #define GPIO_PWR_CONTROL_PIN       GPIO_GetPin(PWR_CONTROL_PIN)
 

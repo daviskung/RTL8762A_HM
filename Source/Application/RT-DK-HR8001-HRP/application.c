@@ -106,9 +106,9 @@ uint8_t NoSignalShutdownCnt;
 /* version date set */
 #define	VER_YEAR_SET	2019
 #define	VER_MONTH_SET	1
-#define	VER_DAY_SET		11
+#define	VER_DAY_SET		14
 
-#define	VER_DASH_SET	2
+#define	VER_DASH_SET	1
 // push code to Backlog : 
 // Repository Name : RTL8762HM3_0107_2019
 // HTTPhttps://davishm3.backlog.com/git/RTL8762HM3/RTL8762HM3_0107_2019.git
@@ -178,6 +178,9 @@ void application_task_init()
 		DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** Battery power ON !\n", 0);
 		GPIO_WriteBit(GPIO_PWR_CONTROL_PIN,Bit_SET); // PWR_CONTROL_PIN ON
 		DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** PWR_CONTROL_PIN ON !\n", 0);
+		
+		GPIO_WriteBit(GPIO_BAT_VOLT_IN_CONT_PIN,Bit_SET); // control VBAT_IN for BatVoltADC
+		DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** control VBAT_IN for BatVoltADC !\n", 0);
 	}
 	
 }
