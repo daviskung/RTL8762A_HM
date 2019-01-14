@@ -37,7 +37,7 @@
 #define EVENT_SCAN_KEY_TIMER			4
 #define EVENT_RxEndFlag_SET				5
 #define EVENT_PWR_KEY_PUSH_SET			6
-//#define EVENT_PWR_KEY_RELEASE_SET		7
+#define EVENT_GAPSTATE_CONNECTED		7
 
 #define BTCONN_GAPSTATE_ADVERTISING			8
 #define BTCONN_GAPSTATE_CONNECTED		9
@@ -49,7 +49,7 @@
 
 #define ARY_SIZE		100
 
-#define NO_SIGNAL_SHUTDOWN_CNT_SET			25
+#define NO_SIGNAL_SHUTDOWN_CNT_SET			35
 
 /* Defines ------------------------------------------------------------------*/
 

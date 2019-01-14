@@ -108,7 +108,7 @@ uint8_t NoSignalShutdownCnt;
 #define	VER_MONTH_SET	1
 #define	VER_DAY_SET		11
 
-#define	VER_DASH_SET	0
+#define	VER_DASH_SET	2
 // push code to Backlog : 
 // Repository Name : RTL8762HM3_0107_2019
 // HTTPhttps://davishm3.backlog.com/git/RTL8762HM3/RTL8762HM3_0107_2019.git
@@ -317,6 +317,11 @@ void heartrate_task_app(void *pvParameters)
 				#endif
 				
 				CalculateHeartRate();
+			}
+
+			if(Event == EVENT_GAPSTATE_CONNECTED)	// give more time for connect state
+			{
+				NoSignalShutdownCnt=0;
 			}
 
 			if(Event == EVENT_SCAN_KEY_TIMER)

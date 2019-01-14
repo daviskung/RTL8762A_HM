@@ -135,6 +135,7 @@ void AppHandleIODriverMessage(BEE_IO_MSG io_driver_msg_recv)
 void peripheral_HandleBtGapStateChangeEvt(uint8_t newState)
 {
 	
+	uint8_t _hr_event;
     switch ( newState )
     {
         //connection is disconnected or idle with no advertising
@@ -170,6 +171,9 @@ void peripheral_HandleBtGapStateChangeEvt(uint8_t newState)
             {
 				BTconnectState = BTCONN_GAPSTATE_CONNECTED;
 				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** Into BTCONN_GAPSTATE_CONNECTED !  \n", 0);
+				_hr_event = EVENT_GAPSTATE_CONNECTED;
+				// Send Task
+				xQueueSend(hHeartRateQueueHandle, &_hr_event, 1);
             }
             break;
 

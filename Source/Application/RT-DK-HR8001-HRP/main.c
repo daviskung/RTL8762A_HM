@@ -125,13 +125,17 @@ static uint8_t scanRspData[] =
 	GAP_ADTYPE_16BIT_COMPLETE,
 	LO_WORD(GATT_UUID_DEVICE_INFORMATION_SERVICE),
 	HI_WORD(GATT_UUID_DEVICE_INFORMATION_SERVICE),
+#endif
+
+	/* iOS藍牙設定裡顯示藍牙廣播裝置名稱 :
+		差異在SCAN response data加入HRS serive ID與否，
+		會在iOS的藍牙設定控制裡面顯示GAP device name. */
 
 	/* HRS Service */
 	0x03,
 	GAP_ADTYPE_16BIT_COMPLETE,
 	LO_WORD(GATT_UUID_SERVICE_HEART_RATE),
 	HI_WORD(GATT_UUID_SERVICE_HEART_RATE),
-#endif
 
 
 	/* HRS Service */
