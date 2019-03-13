@@ -74,6 +74,8 @@ uint8_t uGetFromPICBuf[10];
 uint16_t uTxCnt;
 
 uint8_t _myHR;
+uint16_t _RR_Interval;
+
 uint8_t AGC_MCP4011_Gain;
 uint8_t BTconnectState= 0;
 
@@ -81,6 +83,9 @@ uint8_t BTconnectState= 0;
 uint8_t NoSignalShutdownCnt;
 
 #define DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY	0
+
+#define _myHR_IN_RANGE	1
+#define _myHR_OUT_of_RANGE	0
 
 
 
@@ -105,8 +110,8 @@ uint8_t NoSignalShutdownCnt;
 
 /* version date set */
 #define	VER_YEAR_SET	2019
-#define	VER_MONTH_SET	1
-#define	VER_DAY_SET		14
+#define	VER_MONTH_SET	3
+#define	VER_DAY_SET		13
 
 #define	VER_DASH_SET	1
 // push code to Backlog : 
@@ -309,7 +314,7 @@ void heartrate_task_app(void *pvParameters)
 	{
 		if(xQueueReceive(hHeartRateQueueHandle, &Event, portMAX_DELAY) == pdPASS)
 		{
-			if(Event == EVENT_START_HEARTRATE_CALCULATE)
+			if((Event == EVENT_START_HEARTRATE_CALCULATE)&&(_myHR == _myHR_IN_RANGE))
 			{
 				#if 0
 				tmp_i++;
@@ -319,8 +324,13 @@ void heartrate_task_app(void *pvParameters)
 					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_RESET);
 				#endif
 				
+				#if 0
+				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "* _myHR_IN_RANGE \n", 0);
+				#endif
 				CalculateHeartRate();
+				
 			}
+			
 
 			if(Event == EVENT_GAPSTATE_CONNECTED)	// give more time for connect state
 			{
@@ -421,41 +431,55 @@ void heartrate_task_app(void *pvParameters)
 
 						if(uGetFromPICBuf[0] == 'H'){
 							indexFromPIC = uGetFromPICBuf[1]-'0';
+							
+							
+							KEYscan_fun_cnt=0;
+							uGetFromPICBuf[3] = uGetFromPICBuf[3]-'0';
+							uGetFromPICBuf[4] = uGetFromPICBuf[4]-'0';
+									
+							uGetFromPICBuf[6] = uGetFromPICBuf[6]-'0';
+							uGetFromPICBuf[7] = uGetFromPICBuf[7]-'0';
+							uGetFromPICBuf[8] = uGetFromPICBuf[8]-'0';
+							//_myHR = uGetFromPICBuf[6] *100 + uGetFromPICBuf[7]*10 + uGetFromPICBuf[8];
+							// _RR_Interval in Hex format
+							_RR_Interval = uGetFromPICBuf[6] *256 + uGetFromPICBuf[7]*16 + uGetFromPICBuf[8];
+							AGC_MCP4011_Gain = uGetFromPICBuf[3]*10 + uGetFromPICBuf[4];
+
+							//if(( _myHR > 40 ) && ( _myHR < 210 )){											
+							if(( _RR_Interval < 1500 ) && ( _RR_Interval > 300 )){	
+										NoSignalShutdownCnt=0;
+										_myHR = _myHR_IN_RANGE;
+										
+							#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+									DBG_BUFFER(MODULE_APP, LEVEL_INFO, "H%d _RR_Interval = %d,Gain = %d \n", 3,indexFromPIC,_RR_Interval,AGC_MCP4011_Gain);
+							#endif
+								
+							}
+							else 
+							{									
+								
+							#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+									DBG_BUFFER(MODULE_APP, LEVEL_INFO, "-> HR out of Range %d , Gain = %d", 2,NoSignalShutdownCnt,AGC_MCP4011_Gain);
+							#endif
+									NoSignalShutdownCnt++;
+									if(AGC_MCP4011_Gain > 58)
+											NoSignalShutdownCnt++;
+									_myHR = _myHR_OUT_of_RANGE;
+										//_myHR=0;
+										//_RR_Interval = 0;
+							}
+					        
+
 							if(indexFromPIC == 2)
 							{
 								NoSignalShutdownCnt++;
+							
+							#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
 								DBG_BUFFER(MODULE_APP, LEVEL_INFO, "H2 status %d", 1,NoSignalShutdownCnt);
-									_myHR=0;
+							#endif
+									//_myHR=0;
+									//_RR_Interval = 0;
 							}
-							else if((indexFromPIC == 0) || (indexFromPIC == 1))
-							{
-									KEYscan_fun_cnt=0;
-									uGetFromPICBuf[3] = uGetFromPICBuf[3]-'0';
-									uGetFromPICBuf[4] = uGetFromPICBuf[4]-'0';
-									
-									uGetFromPICBuf[6] = uGetFromPICBuf[6]-'0';
-									uGetFromPICBuf[7] = uGetFromPICBuf[7]-'0';
-									uGetFromPICBuf[8] = uGetFromPICBuf[8]-'0';
-									_myHR = uGetFromPICBuf[6] *100 + uGetFromPICBuf[7]*10 + uGetFromPICBuf[8];
-									AGC_MCP4011_Gain = uGetFromPICBuf[3]*10 + uGetFromPICBuf[4];
-
-									if(( _myHR > 40 ) && ( _myHR < 210 )){											
-										NoSignalShutdownCnt=0;
-										
-								#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
-										DBG_BUFFER(MODULE_APP, LEVEL_INFO, "H%d_myHR = %d,Gain = %d \n", 3,indexFromPIC,_myHR,AGC_MCP4011_Gain);
-								#endif
-								
-									}
-									else 
-									{										
-										DBG_BUFFER(MODULE_APP, LEVEL_INFO, "-> HR out of Range %d , Gain = %d", 2,NoSignalShutdownCnt,AGC_MCP4011_Gain);
-										NoSignalShutdownCnt++;
-										if(AGC_MCP4011_Gain > 58)
-											NoSignalShutdownCnt++;
-										_myHR=0;
-									}
-					        }
 							
 							if( NoSignalShutdownCnt > NO_SIGNAL_SHUTDOWN_CNT_SET ){
 								//DBG_BUFFER(MODULE_APP, LEVEL_INFO, "< No Signal Shutdown >",0);

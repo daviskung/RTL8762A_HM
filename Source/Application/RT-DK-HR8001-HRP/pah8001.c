@@ -57,9 +57,6 @@ uint8_t _cnt_to_update_heart_rate;
 uint8_t update_cnt;
 uint8_t ready_flag;
 
-//uint16_t uTxCnt;
-//uint8_t uTxBuf[128];
-//float _myHR;
 
 bool KEYscan_fun(void)
 {

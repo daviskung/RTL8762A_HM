@@ -70,6 +70,8 @@ extern uint8_t advertData[] ;
 
 /* import heart rate */
 extern uint8_t _myHR;
+extern uint16_t _RR_Interval;
+
 extern uint8_t AGC_MCP4011_Gain;
 
 extern uint8_t BTconnectState;
@@ -502,12 +504,14 @@ void UpdateHeartRate(void)
 */
 uint16_t TempHeart;
 uint16_t	HeartRate_ENERGY_EXPENDED=5;
-uint16_t	HeartRate_RR_Interval=742;
+uint16_t	HeartRate_RR_Interval=0;
 
 
 bool HeartRateServiceValueNotify(void)
 {
 	uint8_t HeartValue[2];
+	
+	uint16_t _RR_Interval_tmp;
 
 	HEART_RATE_MEASUREMENT_VALUE_FLAG hrs_flag;
 
@@ -525,12 +529,18 @@ bool HeartRateServiceValueNotify(void)
 
 	HRS_SetParameter(HRS_HEART_RATE_MEASUREMENT_PARAM_FLAG, 1, &hrs_flag);
 
-	TempHeart =(uint16_t)_myHR;
-	// HeartRate_ENERGY_EXPENDED++; 				// keep value is 5
-	HeartRate_RR_Interval = 60000/TempHeart;		// keep value is 742
+	//TempHeart =(uint16_t)_myHR;
+	// HeartRate_ENERGY_EXPENDED++; 				
+	//HeartRate_RR_Interval = 60000/TempHeart;	
+
+	_RR_Interval_tmp = _RR_Interval;
+	TempHeart = 60000/_RR_Interval_tmp;
+	HeartRate_RR_Interval = _RR_Interval_tmp;
 	
-	
+	#if 0
 	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***  Heart rate = %d Gain = %d \n", 2, TempHeart,AGC_MCP4011_Gain);
+	#endif
+	
 	if(hrs_flag.Heart_Rate_Value_Format_bit == Heart_Rate_Value_Format_UINT16)
 	{
 		HeartValue[0] = TempHeart>>8; HeartValue[1] = TempHeart&0xFF;
