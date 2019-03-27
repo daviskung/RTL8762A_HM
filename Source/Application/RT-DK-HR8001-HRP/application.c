@@ -111,7 +111,7 @@ uint8_t NoSignalShutdownCnt;
 /* version date set */
 #define	VER_YEAR_SET	2019
 #define	VER_MONTH_SET	3
-#define	VER_DAY_SET		13
+#define	VER_DAY_SET		27	
 
 #define	VER_DASH_SET	1
 // push code to Backlog : 
@@ -131,7 +131,7 @@ xQueueHandle hMessageQueueHandle;
 xQueueHandle hIoQueueHandle;
 xQueueHandle hHeartRateQueueHandle = NULL;
 
-xTimerHandle hPAH8001_Timer = NULL;
+//xTimerHandle hPAH8001_Timer = NULL;
 xTimerHandle hKEYscan_Timer = NULL;
 
 
@@ -249,8 +249,9 @@ void heartrate_task_app(void *pvParameters)
     uint8_t indexFromPIC = 0;
     uint8_t PWRkey_timer_cnt = 0;
     uint8_t i = 0;
-    //uint8_t tmp_i = 0;
-
+    uint8_t BTsendState = BTSendOff;
+    
+	#if 0
 	if(hPAH8001_Timer == NULL)
 	{
 		hPAH8001_Timer = xTimerCreate(	"SENSOR_PAH8001_TIMER",			// Just a text name, not used by the kernel.
@@ -261,6 +262,7 @@ void heartrate_task_app(void *pvParameters)
 	}
 
 	DBG_BUFFER(MODULE_APP, LEVEL_INFO, " ***hPAH8001_Timer value = 0x%x \n", 1,hPAH8001_Timer);
+	#endif
 	
 	if(hKEYscan_Timer == NULL)
 	{
@@ -314,24 +316,6 @@ void heartrate_task_app(void *pvParameters)
 	{
 		if(xQueueReceive(hHeartRateQueueHandle, &Event, portMAX_DELAY) == pdPASS)
 		{
-			if((Event == EVENT_START_HEARTRATE_CALCULATE)&&(_myHR == _myHR_IN_RANGE))
-			{
-				#if 0
-				tmp_i++;
-				if(tmp_i%2 == 0)
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_SET); 
-				else 
-					GPIO_WriteBit(GPIO_S4_TEST_KEY_PIN,Bit_RESET);
-				#endif
-				
-				#if 0
-				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "* _myHR_IN_RANGE \n", 0);
-				#endif
-				CalculateHeartRate();
-				
-			}
-			
-
 			if(Event == EVENT_GAPSTATE_CONNECTED)	// give more time for connect state
 			{
 				NoSignalShutdownCnt=0;
@@ -487,8 +471,14 @@ void heartrate_task_app(void *pvParameters)
 								DBG_BUFFER(MODULE_APP, LEVEL_INFO, "** < No Signal Shutdown > / PWR_CONTROL_PIN Off !!!\n", 0);
 								GPIO_WriteBit(GPIO_PWR_CONTROL_PIN,Bit_RESET); // PWR_CONTROL_PIN Off	
 							}
+							
+							BTsendState = BTSendOn;
 
 						}
+
+						
+
+						
 					}
 					else if( RxCount == 6 ){
 						if((RxBuffer[0] == 'E') && (RxBuffer[1] == 'N') && (RxBuffer[2] == 'B'))
@@ -509,7 +499,16 @@ void heartrate_task_app(void *pvParameters)
 			
 		}
 		
-		
+		if((BTsendState == BTSendOn)&&(_myHR == _myHR_IN_RANGE))
+		{
+				
+			#if 0
+				DBG_BUFFER(MODULE_APP, LEVEL_INFO, "* _myHR_IN_RANGE \n", 0);
+			#endif
+			CalculateHeartRate();
+			
+			BTsendState = BTSendOff;
+		}
 		
 	}
 

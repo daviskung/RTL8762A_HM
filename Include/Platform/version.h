@@ -4,9 +4,12 @@
 //				SENSOR_PAH8001_INTERVAL 500    // 500 msec
 //				* PIC Note:2019.03.12	In [case AN0_UNDER_RANGE_Event:] reset AGC_MCP4011_Gain to MIDGAIN=32
 //	2019.03.13	_myHR_OUT_of_RANGE disable CalculateHeartRate().
+//	2019.03.22	mail: Date[21 Mar 2019] send the one data point when you collect an IBI.
+//				2019.03.27 test ok
+
 #define VERSION_MAJOR            1
 #define VERSION_MINOR            2
-#define VERSION_REVISION         19314
+#define VERSION_REVISION         19327
 #define VERSION_BUILD            12638
 #define NUM4STR(a,b,c,d)         #a "." #b "." #c "." #d
 #define VERSIONBUILDSTR(a,b,c,d) NUM4STR(a,b,c,d)

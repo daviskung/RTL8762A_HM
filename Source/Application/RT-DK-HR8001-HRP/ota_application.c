@@ -46,6 +46,7 @@
 #define 	VOLT_3V5	0x61f4
 #define 	VOLT_4V2	0x6baf
 
+#define DEBUG_BT_CON_HEART_RATE_VALUE_DISPLAY	1
 
 
 
@@ -53,7 +54,7 @@
 gaprole_States_t gapProfileState = GAPSTATE_INIT;
 extern xQueueHandle hHeartRateQueueHandle;
 
-extern xTimerHandle hPAH8001_Timer;
+//extern xTimerHandle hPAH8001_Timer;
 extern xTimerHandle hKEYscan_Timer;
 
 
@@ -537,7 +538,7 @@ bool HeartRateServiceValueNotify(void)
 	TempHeart = 60000/_RR_Interval_tmp;
 	HeartRate_RR_Interval = _RR_Interval_tmp;
 	
-	#if 0
+	#if DEBUG_BT_CON_HEART_RATE_VALUE_DISPLAY
 	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***  Heart rate = %d Gain = %d \n", 2, TempHeart,AGC_MCP4011_Gain);
 	#endif
 	
@@ -718,7 +719,7 @@ TAppResult AppProfileCallback(uint8_t serviceID, void *pData)
 					if(pHrsCallbackData->msg_data.notification_indification_index == HRS_NOTIFY_INDICATE_MEASUREMENT_VALUE_ENABLE)
 					{							
 						is_heart_rate_service_notification_enabled = true;
-						xTimerStart(hPAH8001_Timer, 0);
+						//xTimerStart(hPAH8001_Timer, 0);
 						DBG_BUFFER(MODULE_APP, LEVEL_INFO, "profile callback HRS_NOTIFY_INDICATE_MEASUREMENT_VALUE_ENABLE\n", 0);
 
 						uTxCnt = sprintf((char *)uTxBuf, "EN1\n\r");	// 啟動 PIC 
@@ -727,7 +728,7 @@ TAppResult AppProfileCallback(uint8_t serviceID, void *pData)
 					else if(pHrsCallbackData->msg_data.notification_indification_index == HRS_NOTIFY_INDICATE_MEASUREMENT_VALUE_DISABLE)
 					{
 						is_heart_rate_service_notification_enabled = false;
-						xTimerStop(hPAH8001_Timer, 0);
+						//xTimerStop(hPAH8001_Timer, 0);
 						DBG_BUFFER(MODULE_APP, LEVEL_INFO, "profile callback HRS_NOTIFY_INDICATE_MEASUREMENT_VALUE_DISABLE\n", 0);
 
 						uTxCnt = sprintf((char *)uTxBuf, "STP\n\r");	// 關閉 PIC 

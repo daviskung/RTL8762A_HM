@@ -27,7 +27,7 @@ extern bool is_heart_rate_monitor_notification_enabled;
 
 extern bool HeartRateServiceValueNotify(void);
 
-extern xTimerHandle hPAH8001_Timer;
+//extern xTimerHandle hPAH8001_Timer;
 extern xTimerHandle hKEYscan_Timer;
 
 
@@ -79,6 +79,7 @@ bool KEYscan_fun(void)
 // Return: None
 // Description:
 //--------------------------------------------------------------------------*/
+/*
 bool Pixart_HRD(void)
 {
 	uint8_t _hr_event;
@@ -92,7 +93,7 @@ bool Pixart_HRD(void)
 		xQueueSend(hHeartRateQueueHandle, &_hr_event, 1);
 		return TRUE;
 }
-
+*/
 
 /*--------------------------------------------------------------------------
 // Function name: void LED_Ctrl(void)
