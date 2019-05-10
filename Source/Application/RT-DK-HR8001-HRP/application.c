@@ -69,6 +69,7 @@ uint8_t uTxBuf[128];
 uint8_t EnPICcmdBuf[5];
 //uint8_t uGetFromPICBuf[9];
 uint8_t uGetFromPICBuf[10];
+uint8_t uGetFromPICBuf_ver[4];
 
 
 uint16_t uTxCnt;
@@ -110,10 +111,10 @@ uint8_t NoSignalShutdownCnt;
 
 /* version date set */
 #define	VER_YEAR_SET	2019
-#define	VER_MONTH_SET	3
-#define	VER_DAY_SET		27	
+#define	VER_MONTH_SET	5
+#define	VER_DAY_SET		10	
 
-#define	VER_DASH_SET	1
+#define	VER_DASH_SET	0
 // push code to Backlog : 
 // Repository Name : RTL8762HM3_0107_2019
 // HTTPhttps://davishm3.backlog.com/git/RTL8762HM3/RTL8762HM3_0107_2019.git
@@ -480,9 +481,17 @@ void heartrate_task_app(void *pvParameters)
 
 						
 					}
-					else if( RxCount == 6 ){
+					else if( RxCount == 9 ){
 						if((RxBuffer[0] == 'E') && (RxBuffer[1] == 'N') && (RxBuffer[2] == 'B'))
-							KEYscan_fun_cnt=0;
+							for (i = 3; i < 8; ++i){
+								uGetFromPICBuf_ver[i-3] = RxBuffer[i];
+							}
+						if((uGetFromPICBuf_ver[0]-'0') < 10	)
+							uGetFromPICBuf_ver[0] = uGetFromPICBuf_ver[0]-'0' ;
+							
+						DBG_BUFFER(MODULE_APP, LEVEL_INFO, "< uC ver = [%d] [%d] [%d] -%d >",4,
+								uGetFromPICBuf_ver[0],uGetFromPICBuf_ver[1]-'0',uGetFromPICBuf_ver[2]-'0',uGetFromPICBuf_ver[3]-'0');
+						KEYscan_fun_cnt=0;
 					}
 					RxEndFlag = 0;
 					RxCount = 0;

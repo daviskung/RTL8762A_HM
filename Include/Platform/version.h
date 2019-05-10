@@ -6,10 +6,13 @@
 //	2019.03.13	_myHR_OUT_of_RANGE disable CalculateHeartRate().
 //	2019.03.22	mail: Date[21 Mar 2019] send the one data point when you collect an IBI.
 //				2019.03.27 test ok
+//	2019.04.17	 test after new HD(重灌)
+//	2019.05.10	ack 增加 PIC version number 訊息
+
 
 #define VERSION_MAJOR            1
 #define VERSION_MINOR            2
-#define VERSION_REVISION         19327
+#define VERSION_REVISION         19510	// test after new HD
 #define VERSION_BUILD            12638
 #define NUM4STR(a,b,c,d)         #a "." #b "." #c "." #d
 #define VERSIONBUILDSTR(a,b,c,d) NUM4STR(a,b,c,d)
