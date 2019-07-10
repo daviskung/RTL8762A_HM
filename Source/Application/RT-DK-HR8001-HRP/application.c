@@ -75,7 +75,10 @@ uint8_t uGetFromPICBuf_ver[4];
 uint16_t uTxCnt;
 
 uint8_t _myHR;
-uint16_t _RR_Interval;
+uint16_t _RR_Interval , _RR_Interval_pre;
+uint16_t _NSTROBE_SetVal , _NSTROBE_SetVal_pre;
+uint16_t _NSTROBE_Rset_SetVal , _NSTROBE_Rset_SetVal_pre;
+
 
 uint8_t AGC_MCP4011_Gain;
 uint8_t BTconnectState= 0;
@@ -111,8 +114,8 @@ uint8_t NoSignalShutdownCnt;
 
 /* version date set */
 #define	VER_YEAR_SET	2019
-#define	VER_MONTH_SET	5
-#define	VER_DAY_SET		10	
+#define	VER_MONTH_SET	7
+#define	VER_DAY_SET		9	
 
 #define	VER_DASH_SET	0
 // push code to Backlog : 
@@ -312,6 +315,9 @@ void heartrate_task_app(void *pvParameters)
 	
 	DBG_BUFFER(MODULE_APP, LEVEL_INFO, " Ver. %d/%d/%d -%d \n",4,
 		VER_MONTH_SET,VER_DAY_SET,VER_YEAR_SET,VER_DASH_SET);
+
+	_NSTROBE_SetVal_pre = 0;
+	_NSTROBE_Rset_SetVal_pre = 0;
 	
 	while(true)
 	{
@@ -418,22 +424,77 @@ void heartrate_task_app(void *pvParameters)
 							indexFromPIC = uGetFromPICBuf[1]-'0';
 							
 							
+							uGetFromPICBuf[2] = uGetFromPICBuf[2]-'0';	// 2019.06.13  增加 "NSTROBE_Rset"
 							KEYscan_fun_cnt=0;
 							uGetFromPICBuf[3] = uGetFromPICBuf[3]-'0';
 							uGetFromPICBuf[4] = uGetFromPICBuf[4]-'0';
-									
-							uGetFromPICBuf[6] = uGetFromPICBuf[6]-'0';
-							uGetFromPICBuf[7] = uGetFromPICBuf[7]-'0';
-							uGetFromPICBuf[8] = uGetFromPICBuf[8]-'0';
+							
+							uGetFromPICBuf[5] = uGetFromPICBuf[5]-'0';	// 2019.06.06  增加 "NSTROBE_LOW_EndSet"
+						
+						#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+							DBG_BUFFER(MODULE_APP, LEVEL_INFO, "_RR_Interval in Hex = 0x%x - 0x%x - 0x%x\n",
+									3,uGetFromPICBuf[6],uGetFromPICBuf[7],uGetFromPICBuf[8]);
+						#endif
+						
+							// if in Hex format -> A - F 代表  0x41 = 'A'
+							
+							if( uGetFromPICBuf[6] >= 'A' )
+								uGetFromPICBuf[6] = uGetFromPICBuf[6]-'A' + 10;
+							else uGetFromPICBuf[6] = uGetFromPICBuf[6]-'0';
+
+							if( uGetFromPICBuf[7] >= 'A' )
+								uGetFromPICBuf[7] = uGetFromPICBuf[7]-'A' + 10;
+							else uGetFromPICBuf[7] = uGetFromPICBuf[7]-'0';
+
+							if( uGetFromPICBuf[8] >= 'A' )
+								uGetFromPICBuf[8] = uGetFromPICBuf[8]-'A' + 10;
+							else uGetFromPICBuf[8] = uGetFromPICBuf[8]-'0';
+							
 							//_myHR = uGetFromPICBuf[6] *100 + uGetFromPICBuf[7]*10 + uGetFromPICBuf[8];
 							// _RR_Interval in Hex format
 							_RR_Interval = uGetFromPICBuf[6] *256 + uGetFromPICBuf[7]*16 + uGetFromPICBuf[8];
+
+						#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+							DBG_BUFFER(MODULE_APP, LEVEL_INFO, "_RR_Interval = %d, %d ,%d,%d\n",
+										4,_RR_Interval,uGetFromPICBuf[6],uGetFromPICBuf[7],uGetFromPICBuf[8]);
+						#endif
+						
 							AGC_MCP4011_Gain = uGetFromPICBuf[3]*10 + uGetFromPICBuf[4];
+							_NSTROBE_SetVal = uGetFromPICBuf[5];
+							_NSTROBE_Rset_SetVal = uGetFromPICBuf[2];
+
+							if((_NSTROBE_SetVal != _NSTROBE_SetVal_pre) 
+								&& (_NSTROBE_Rset_SetVal != _NSTROBE_Rset_SetVal_pre)){
+								
+								_RR_Interval_pre = _RR_Interval;	// 紀錄 先前資料
+								_NSTROBE_SetVal_pre = _NSTROBE_SetVal;
+								_NSTROBE_Rset_SetVal_pre = _NSTROBE_Rset_SetVal;
+							}
 
 							//if(( _myHR > 40 ) && ( _myHR < 210 )){											
 							if(( _RR_Interval < 1500 ) && ( _RR_Interval > 300 )){	
-										NoSignalShutdownCnt=0;
-										_myHR = _myHR_IN_RANGE;
+								NoSignalShutdownCnt=0;
+								_myHR = _myHR_IN_RANGE;
+							
+								if(( _RR_Interval > _RR_Interval_pre ) 
+									&& (( _RR_Interval - _RR_Interval_pre ) > 100)){
+									
+									_myHR = _myHR_OUT_of_RANGE;
+										
+									DBG_BUFFER(MODULE_APP, LEVEL_INFO, "over 100ms** _RR_Interval = %d,_RR_Interval_pre = %d \n",
+										2,_RR_Interval,_RR_Interval_pre);
+								}
+
+								if(( _RR_Interval_pre > _RR_Interval ) 
+									&& (( _RR_Interval_pre - _RR_Interval ) > 100)){
+									
+									_myHR = _myHR_OUT_of_RANGE;
+										
+									DBG_BUFFER(MODULE_APP, LEVEL_INFO, "over 100ms* _RR_Interval = %d,_RR_Interval_pre = %d \n",
+										2,_RR_Interval,_RR_Interval_pre);
+								}
+									
+								_RR_Interval_pre = _RR_Interval;	// 紀錄 先前資料
 										
 							#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
 									DBG_BUFFER(MODULE_APP, LEVEL_INFO, "H%d _RR_Interval = %d,Gain = %d \n", 3,indexFromPIC,_RR_Interval,AGC_MCP4011_Gain);

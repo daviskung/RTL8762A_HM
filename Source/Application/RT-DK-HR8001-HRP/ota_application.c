@@ -72,6 +72,10 @@ extern uint8_t advertData[] ;
 /* import heart rate */
 extern uint8_t _myHR;
 extern uint16_t _RR_Interval;
+extern uint16_t _NSTROBE_SetVal;
+extern uint16_t _NSTROBE_Rset_SetVal;
+ 
+
 
 extern uint8_t AGC_MCP4011_Gain;
 
@@ -539,7 +543,8 @@ bool HeartRateServiceValueNotify(void)
 	HeartRate_RR_Interval = _RR_Interval_tmp;
 	
 	#if DEBUG_BT_CON_HEART_RATE_VALUE_DISPLAY
-	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***  Heart rate = %d Gain = %d \n", 2, TempHeart,AGC_MCP4011_Gain);
+	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***  Heart rate = %d Gain = %d NSTROBE_SetVal = %d _NSTROBE_Rset = %d \n"
+		, 4, TempHeart,AGC_MCP4011_Gain,_NSTROBE_SetVal,_NSTROBE_Rset_SetVal);
 	#endif
 	
 	if(hrs_flag.Heart_Rate_Value_Format_bit == Heart_Rate_Value_Format_UINT16)

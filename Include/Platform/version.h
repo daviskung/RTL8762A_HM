@@ -8,11 +8,14 @@
 //				2019.03.27 test ok
 //	2019.04.17	 test after new HD(重灌)
 //	2019.05.10	ack 增加 PIC version number 訊息
-
+//	2019.06.06	NSTROBE_LOW_EndSet send out to monitor
+//	2019.06.13  增加 "NSTROBE_Rset"
+//	2019.07.09	增加 _RR_Interval_pre 檢查 是否合理值
+//				modify _RR_Interval Hex format error ('A'~ 'F')
 
 #define VERSION_MAJOR            1
 #define VERSION_MINOR            2
-#define VERSION_REVISION         19510	// test after new HD
+#define VERSION_REVISION         19709	// test after new HD
 #define VERSION_BUILD            12638
 #define NUM4STR(a,b,c,d)         #a "." #b "." #c "." #d
 #define VERSIONBUILDSTR(a,b,c,d) NUM4STR(a,b,c,d)
