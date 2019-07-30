@@ -87,6 +87,8 @@ uint8_t BTconnectState= 0;
 uint8_t NoSignalShutdownCnt;
 
 #define DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY	0
+#define DEBUG_HEART_RATE_DISPLAY2	0
+
 
 #define _myHR_IN_RANGE	1
 #define _myHR_OUT_of_RANGE	0
@@ -115,7 +117,7 @@ uint8_t NoSignalShutdownCnt;
 /* version date set */
 #define	VER_YEAR_SET	2019
 #define	VER_MONTH_SET	7
-#define	VER_DAY_SET		9	
+#define	VER_DAY_SET		24	
 
 #define	VER_DASH_SET	0
 // push code to Backlog : 
@@ -315,6 +317,7 @@ void heartrate_task_app(void *pvParameters)
 	
 	DBG_BUFFER(MODULE_APP, LEVEL_INFO, " Ver. %d/%d/%d -%d \n",4,
 		VER_MONTH_SET,VER_DAY_SET,VER_YEAR_SET,VER_DASH_SET);
+	DBG_BUFFER(MODULE_APP, LEVEL_INFO, "[note] 1 counter = 1.024 ms \n", 0);
 
 	_NSTROBE_SetVal_pre = 0;
 	_NSTROBE_Rset_SetVal_pre = 0;
@@ -431,7 +434,7 @@ void heartrate_task_app(void *pvParameters)
 							
 							uGetFromPICBuf[5] = uGetFromPICBuf[5]-'0';	// 2019.06.06  增加 "NSTROBE_LOW_EndSet"
 						
-						#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+						#if DEBUG_HEART_RATE_DISPLAY2
 							DBG_BUFFER(MODULE_APP, LEVEL_INFO, "_RR_Interval in Hex = 0x%x - 0x%x - 0x%x\n",
 									3,uGetFromPICBuf[6],uGetFromPICBuf[7],uGetFromPICBuf[8]);
 						#endif
@@ -454,7 +457,7 @@ void heartrate_task_app(void *pvParameters)
 							// _RR_Interval in Hex format
 							_RR_Interval = uGetFromPICBuf[6] *256 + uGetFromPICBuf[7]*16 + uGetFromPICBuf[8];
 
-						#if DEBUG_HEART_RATE_MEASUREMENT_VALUE_DISPLAY
+						#if DEBUG_HEART_RATE_DISPLAY2
 							DBG_BUFFER(MODULE_APP, LEVEL_INFO, "_RR_Interval = %d, %d ,%d,%d\n",
 										4,_RR_Interval,uGetFromPICBuf[6],uGetFromPICBuf[7],uGetFromPICBuf[8]);
 						#endif

@@ -517,6 +517,7 @@ bool HeartRateServiceValueNotify(void)
 	uint8_t HeartValue[2];
 	
 	uint16_t _RR_Interval_tmp;
+	uint32_t _RR_Interval_tmp2;
 
 	HEART_RATE_MEASUREMENT_VALUE_FLAG hrs_flag;
 
@@ -537,14 +538,17 @@ bool HeartRateServiceValueNotify(void)
 	//TempHeart =(uint16_t)_myHR;
 	// HeartRate_ENERGY_EXPENDED++; 				
 	//HeartRate_RR_Interval = 60000/TempHeart;	
-
-	_RR_Interval_tmp = _RR_Interval;
+	
+	_RR_Interval_tmp2 = (_RR_Interval *128)/125; 	//2019.07.24	 1 counter = 1.024 ms (1024/1000)
+	_RR_Interval =(uint16_t) _RR_Interval_tmp2;
+	
+	_RR_Interval_tmp =_RR_Interval;
 	TempHeart = 60000/_RR_Interval_tmp;
 	HeartRate_RR_Interval = _RR_Interval_tmp;
 	
 	#if DEBUG_BT_CON_HEART_RATE_VALUE_DISPLAY
-	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***  Heart rate = %d Gain = %d NSTROBE_SetVal = %d _NSTROBE_Rset = %d \n"
-		, 4, TempHeart,AGC_MCP4011_Gain,_NSTROBE_SetVal,_NSTROBE_Rset_SetVal);
+	DBG_BUFFER(MODULE_DRIVERTASK, LEVEL_INFO, "***(%d ms ) Heart rate = %d Gain = %d NSTROBE_SetVal = %d _NSTROBE_Rset = %d \n"
+		, 5,_RR_Interval_tmp, TempHeart,AGC_MCP4011_Gain,_NSTROBE_SetVal,_NSTROBE_Rset_SetVal);
 	#endif
 	
 	if(hrs_flag.Heart_Rate_Value_Format_bit == Heart_Rate_Value_Format_UINT16)

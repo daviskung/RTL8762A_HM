@@ -12,10 +12,12 @@
 //	2019.06.13  增加 "NSTROBE_Rset"
 //	2019.07.09	增加 _RR_Interval_pre 檢查 是否合理值
 //				modify _RR_Interval Hex format error ('A'~ 'F')
+//	2019.07.24	AN2_READ_PulseIntervalAvg_1msCnt = (AN2_READ_PulseIntervalAvg_1msCnt *128)/125 ;
+//				1 counter = 1.024 ms (1024/1000) 由 RTL 換算 正確的 ms 值
 
 #define VERSION_MAJOR            1
 #define VERSION_MINOR            2
-#define VERSION_REVISION         19709	// test after new HD
+#define VERSION_REVISION         19724	// test after new HD
 #define VERSION_BUILD            12638
 #define NUM4STR(a,b,c,d)         #a "." #b "." #c "." #d
 #define VERSIONBUILDSTR(a,b,c,d) NUM4STR(a,b,c,d)
